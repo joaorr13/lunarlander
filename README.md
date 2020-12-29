@@ -19,7 +19,7 @@ O obejtivo do jogador é conseguir aterrar o máximo de vezes possível a nave, 
 
 - Pygame
 
-###Tarefas 
+### Tarefas 
 
 1. Carregar a superfície da lua e a nave.
 2. Ler teclas e mover a nave.
