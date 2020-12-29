@@ -13,7 +13,7 @@ Criar um clone do clássico Lunar Lander em Pygame
 
 Lunar Lander consiste num jogo, que tem como objetivo aterrar uma nave na superfície da lua.
 Para tal, a nave deverá estar a uma velocidade reduzida.
-O obejtivo do jogador é conseguir aterrar o máximo de vezes possível a nave, tento em conta o limite de fuel que tem por tentativa.
+O obejtivo do jogador é conseguir aterrar o máximo de vezes possível a nave, tento em conta o limite de combustível que tem por tentativa.
 
 ### Pacotes 
 
