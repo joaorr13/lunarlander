@@ -10,7 +10,9 @@ class Settings:
         self.screen_width = 1080
         self.screen_height = 720
         self.bg = pygame.image.load('assets/fundo.png')
+        self.white = (255,255,255)
         self.font = pygame.font.SysFont('comicsans', 60)
+        self.font_gameover = pygame.font.SysFont('comicsans', 150)
 
 class Lander(Sprite):
     'A class to manage the lander.'
@@ -72,7 +74,6 @@ class Moon(Sprite):
     def draw_moon(self):
         self.screen.blit(self.image, self.rect)
 
-
 class Base(Sprite):
     'A class to manage the base'
 
@@ -100,17 +101,33 @@ class ScoreBoard:
         self.total_score = 0
         self.total_fuel = 1000
         self.wastefuel = False 
+        self.is_gameover = False 
+        self.is_gameover_clutch = False 
 
     def draw_fuel(self):
-        if self.wastefuel == True:
+        if self.wastefuel:
             if self.total_fuel > 0: 
                 self.total_fuel -= 1
-        self.fuel = self.settings.font.render('Fuel  ' + str(self.total_fuel),1,(255,255,255))
+        self.fuel = self.settings.font.render('Fuel  ' + str(self.total_fuel),1,self.settings.white)
         self.screen.blit(self.fuel, self.screen.get_rect())
 
     def draw_score(self):
-        self.score = self.settings.font.render('Score  ' + str(self.total_score),1,(255,255,255))
-        self.screen.blit(self.score,(0,50))
+        if self.is_gameover_clutch:
+            self.score = self.settings.font.render('Score  ' + str(self.total_score + 1),1,self.settings.white)
+            self.screen.blit(self.score,(0,50))
+        else:
+            self.score = self.settings.font.render('Score  ' + str(self.total_score),1,self.settings.white)
+            self.screen.blit(self.score,(0,50))
+
+    def draw_gameover(self):
+        self.gameover = self.settings.font_gameover.render('Game Over!',1,self.settings.white)
+        if self.is_gameover:
+            self.screen.blit(self.gameover,(self.settings.screen_width / 2 - self.gameover.get_width() / 2 , self.settings.screen_height / 2 - self.gameover.get_height() / 2 - 55))
+            self.screen.blit(self.score, (self.settings.screen_width / 2 - self.score.get_width() / 2 , self.settings.screen_height / 2 - self.score.get_height() / 2 + 7))
+        if self.is_gameover_clutch:
+            self.score = self.settings.font.render('Score  ' + str(self.total_score + 1),1,self.settings.white)
+            self.screen.blit(self.gameover,(self.settings.screen_width / 2 - self.gameover.get_width() / 2 , self.settings.screen_height / 2 - self.gameover.get_height() / 2 - 55))
+            self.screen.blit(self.score, (self.settings.screen_width / 2 - self.score.get_width() / 2 , self.settings.screen_height / 2 - self.score.get_height() / 2 + 7))
 
 class LunarLander:
     'Overall class to manage game assets and behavior.'
@@ -169,22 +186,27 @@ class LunarLander:
     def _collisions(self):
         collisions = pygame.sprite.collide_mask(self.lander, self.moon)
         if collisions:
-            self.lander.speed = [0, 0]
-            self.lander.rect = self.lander.image.get_rect()
             if self.scoreboard.total_fuel >= 100:
                 self.scoreboard.total_fuel -= 100
                 self.lander.fuel -= 100
+                self.lander.rect = self.lander.image.get_rect()
             else:
                 self.scoreboard.total_fuel = 0
                 self.lander.fuel = 0 
+                self.lander.speed = [0,0]
+                self.scoreboard.is_gameover = True
     
     def _landing(self):
         landing = pygame.sprite.collide_mask(self.lander, self.base)
         if landing:
-            self.lander.speed = [0, 0]
-            self.lander.rect = self.lander.image.get_rect()
-            self.scoreboard.total_score += 1
-
+            if self.scoreboard.total_fuel > 0:
+                self.lander.speed = [0, 0]
+                self.lander.rect = self.lander.image.get_rect()
+                self.scoreboard.total_score += 1 
+            else:
+                self.lander.speed = [0,0]
+                self.scoreboard.is_gameover_clutch =  True
+                  
     def _update_screen(self):
         'Update images on the screen, and flip to the new screen.'
         self.screen.blit(self.settings.bg, (0, 0))
@@ -193,6 +215,7 @@ class LunarLander:
         self.lander.draw_lander()
         self.scoreboard.draw_fuel()
         self.scoreboard.draw_score()
+        self.scoreboard.draw_gameover()
 
         pygame.display.flip()
         pygame.time.delay(5)
