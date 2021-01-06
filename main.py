@@ -97,18 +97,20 @@ class ScoreBoard:
         self.settings = Settings()
         self.lander = Lander(ll_game)
 
+        self.total_score = 0
         self.total_fuel = 1000
         self.wastefuel = False 
 
-    def update_fuel(self):
+    def draw_fuel(self):
         if self.wastefuel == True:
             if self.total_fuel > 0: 
                 self.total_fuel -= 1
-     
-    def draw_fuel(self):
-        self.update_fuel()
         self.fuel = self.settings.font.render('Fuel  ' + str(self.total_fuel),1,(255,255,255))
         self.screen.blit(self.fuel, self.screen.get_rect())
+
+    def draw_score(self):
+        self.score = self.settings.font.render('Score  ' + str(self.total_score),1,(255,255,255))
+        self.screen.blit(self.score,(0,50))
 
 class LunarLander:
     'Overall class to manage game assets and behavior.'
@@ -181,6 +183,7 @@ class LunarLander:
         if landing:
             self.lander.speed = [0, 0]
             self.lander.rect = self.lander.image.get_rect()
+            self.scoreboard.total_score += 1
 
     def _update_screen(self):
         'Update images on the screen, and flip to the new screen.'
@@ -189,10 +192,10 @@ class LunarLander:
         self.base.draw_base()
         self.lander.draw_lander()
         self.scoreboard.draw_fuel()
+        self.scoreboard.draw_score()
 
         pygame.display.flip()
         pygame.time.delay(5)
-
 
 if __name__ == '__main__':
     ll = LunarLander()
