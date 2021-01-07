@@ -103,7 +103,8 @@ class ScoreBoard:
         self.wastefuel = False 
         self.is_gameover = False 
         self.is_gameover_clutch = False 
-
+        self.contador = 0
+        
     def draw_fuel(self):
         if self.wastefuel:
             if self.total_fuel > 0: 
@@ -121,7 +122,7 @@ class ScoreBoard:
 
     def draw_gameover(self):
         self.gameover = self.settings.font_gameover.render('Game Over!',1,self.settings.white)
-        if self.is_gameover:
+        if self.is_gameover and not self.is_gameover_clutch:
             self.screen.blit(self.gameover,(self.settings.screen_width / 2 - self.gameover.get_width() / 2 , self.settings.screen_height / 2 - self.gameover.get_height() / 2 - 55))
             self.screen.blit(self.score, (self.settings.screen_width / 2 - self.score.get_width() / 2 , self.settings.screen_height / 2 - self.score.get_height() / 2 + 7))
         if self.is_gameover_clutch:
@@ -187,9 +188,14 @@ class LunarLander:
         collisions = pygame.sprite.collide_mask(self.lander, self.moon)
         if collisions:
             if self.scoreboard.total_fuel >= 100:
-                self.scoreboard.total_fuel -= 100
-                self.lander.fuel -= 100
-                self.lander.rect = self.lander.image.get_rect()
+                self.lander.speed = [0,0]
+                self.scoreboard.contador += 1
+                if self.scoreboard.contador == 1:
+                    self.scoreboard.total_fuel -= 100
+                    self.lander.fuel -= 100
+                if self.scoreboard.contador == 50:
+                    self.lander.rect = self.lander.image.get_rect()
+                    self.scoreboard.contador = 0
             else:
                 self.scoreboard.total_fuel = 0
                 self.lander.fuel = 0 
@@ -201,8 +207,12 @@ class LunarLander:
         if landing:
             if self.scoreboard.total_fuel > 0:
                 self.lander.speed = [0, 0]
-                self.lander.rect = self.lander.image.get_rect()
-                self.scoreboard.total_score += 1 
+                self.scoreboard.contador += 1 
+                if self.scoreboard.contador == 1:
+                    self.scoreboard.total_score += 1 
+                if self.scoreboard.contador == 50:
+                    self.lander.rect = self.lander.image.get_rect()
+                    self.scoreboard.contador = 0
             else:
                 self.lander.speed = [0,0]
                 self.scoreboard.is_gameover_clutch =  True
