@@ -34,6 +34,7 @@ class Lander(Sprite):
         self.move_up = False
 
         self.fuel = 500
+        self.land = False 
 
     def move(self):
         self.rect = self.rect.move(self.speed)
@@ -45,7 +46,7 @@ class Lander(Sprite):
         if self.move_right and self.rect.right < self.screen_rect.right:
             if self.speed[0] < 2:
                 self.speed[0] += 0.09
-        if self.move_up and self.fuel > 0:
+        if self.move_up and self.fuel > 0 and not self.land :
             self.fuel -= 1
             if self.speed[1] > -1.5:
                 self.speed[1] -= 0.09
@@ -106,11 +107,12 @@ class ScoreBoard:
         self.is_gameover = False 
         self.is_gameover_clutch = False 
         self.too_fast = False
+        self.land = False 
         self.contador = 0
         
     def draw_fuel(self):
         if self.wastefuel:
-            if self.total_fuel > 0: 
+            if self.total_fuel > 0 and not self.land: 
                 self.total_fuel -= 1
         self.fuel = self.settings.font.render('Fuel  ' + str(self.total_fuel),1,self.settings.white)
         self.screen.blit(self.fuel, self.screen.get_rect())
@@ -197,7 +199,10 @@ class LunarLander:
     def _collisions(self):
         collisions = pygame.sprite.collide_mask(self.lander, self.moon)
         if collisions:
+            self.scoreboard.land = True
+            self.lander.land = True
             if self.scoreboard.total_fuel >= 100:
+                self.flag = True
                 self.lander.speed = [0,0]
                 self.scoreboard.contador += 1
                 if self.scoreboard.contador == 1:
@@ -205,16 +210,32 @@ class LunarLander:
                     self.lander.fuel -= 100
                 if self.scoreboard.contador == 50:
                     self.lander.rect = self.lander.image.get_rect()
+                    self.flag = False 
+                    self.scoreboard.land = False 
+                    self.lander.land = False 
                     self.scoreboard.contador = 0
             else:
-                self.scoreboard.total_fuel = 0
-                self.lander.fuel = 0 
+                self.scoreboard.contador += 1
                 self.lander.speed = [0,0]
-                self.scoreboard.is_gameover = True
+                if not self.flag:
+                    self.scoreboard.total_fuel = 0
+                    self.lander.fuel = 0 
+                    self.scoreboard.is_gameover = True
+                    self.lander.speed = [0,0]
+                if self.flag:
+                    if self.scoreboard.contador == 50:
+                        self.lander.rect = self.lander.image.get_rect()
+                        self.flag = False 
+                        self.scoreboard.land = False
+                        self.lander.land = False
+                        self.scoreboard.contador = 0 
+                
     
     def _landing(self):
         landing = pygame.sprite.collide_mask(self.lander, self.base)
         if landing:
+            self.scoreboard.land = True 
+            self.lander.land = True
             if self.scoreboard.total_fuel > 0:
                 self.scoreboard.contador += 1 
                 if self.scoreboard.contador == 1:
@@ -225,6 +246,8 @@ class LunarLander:
                 self.lander.speed = [0, 0]
                 if self.scoreboard.contador == 50:
                     self.lander.rect = self.lander.image.get_rect()
+                    self.lander.land = False
+                    self.scoreboard.land = False
                     self.scoreboard.contador = 0
                     self.scoreboard.too_fast = False 
             else:
