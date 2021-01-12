@@ -1,6 +1,7 @@
 import sys
 import pygame
 from pygame.sprite import Sprite
+import random
 
 
 class Settings:
@@ -86,8 +87,20 @@ class Base(Sprite):
 
         self.image = pygame.image.load('assets/base.png')
         self.rect = self.image.get_rect()
-        self.rect.x += 500
-        self.rect.y += 479
+        self.possibles_pos = [[500,479], [626,651],[940,547]]
+        self.get_pos = True 
+    
+        self.pos = random.randrange(3)
+        self.rect.x += self.possibles_pos[self.pos][0]
+        self.rect.y += self.possibles_pos[self.pos][1]
+
+    def update_pos(self):
+        if self.get_pos:
+            self.rect = self.image.get_rect()
+            self.pos = random.randrange(3)
+            self.rect.x += self.possibles_pos[self.pos][0]
+            self.rect.y += self.possibles_pos[self.pos][1]
+            self.get_pos = False 
 
     def draw_base(self):
         self.screen.blit(self.image, self.rect)
@@ -228,8 +241,7 @@ class LunarLander:
                         self.flag = False 
                         self.scoreboard.land = False
                         self.lander.land = False
-                        self.scoreboard.contador = 0 
-                
+                        self.scoreboard.contador = 0
     
     def _landing(self):
         landing = pygame.sprite.collide_mask(self.lander, self.base)
@@ -245,11 +257,14 @@ class LunarLander:
                         self.scoreboard.too_fast = True 
                 self.lander.speed = [0, 0]
                 if self.scoreboard.contador == 50:
+                    self.base.get_pos = True
+                    self.flag = False
                     self.lander.rect = self.lander.image.get_rect()
                     self.lander.land = False
                     self.scoreboard.land = False
                     self.scoreboard.contador = 0
-                    self.scoreboard.too_fast = False 
+                    self.scoreboard.too_fast = False
+                    self.base.update_pos()                      
             else:
                 self.lander.speed = [0,0]
                 self.scoreboard.is_gameover_clutch =  True
