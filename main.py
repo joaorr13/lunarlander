@@ -120,6 +120,7 @@ class ScoreBoard:
         self.is_gameover = False 
         self.is_gameover_clutch = False 
         self.too_fast = False
+        self.oops_moon = False
         self.land = False 
         self.contador = 0
         
@@ -154,6 +155,9 @@ class ScoreBoard:
         if self.too_fast:
             self.too_fast_text = self.settings.font.render('Too Fast!',1, self.settings.white)
             self.screen.blit(self.too_fast_text, (self.settings.screen_width / 2 - self.too_fast_text.get_width() / 2 , self.settings.screen_height / 2 - self.too_fast_text.get_height() / 2 - 55))
+        if self.oops_moon:
+            self.oops_moon_text = self.settings.font.render('Oops!',1, self.settings.white)
+            self.screen.blit(self.oops_moon_text, (self.settings.screen_width / 2 - self.oops_moon_text.get_width() / 2 , self.settings.screen_height / 2 - self.oops_moon_text.get_height() / 2 - 55))
 
 class LunarLander:
     'Overall class to manage game assets and behavior.'
@@ -170,6 +174,22 @@ class LunarLander:
         self.base = Base(self)
         self.scoreboard = ScoreBoard(self)
 
+    def main_menu(self):
+        while True:
+            self.screen.blit(self.settings.bg, (0, 0))
+            self.moon.draw_moon()
+            self.press_r =  self.settings.font_gameover.render("Press ""R"" to start!",1,self.settings.white)
+            self.screen.blit(self.press_r,(self.settings.screen_width / 2 - self.press_r.get_width() / 2 , self.settings.screen_height / 2 - self.press_r.get_height() / 2))
+            pygame.display.flip() 
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_r:
+                        self.run_game()
+                    if event.key == pygame.K_ESCAPE:
+                        sys.quit()
+
     def run_game(self):
         while True:
             self._check_events()
@@ -180,7 +200,6 @@ class LunarLander:
             self._update_screen()
 
     def _check_events(self):
-        'Respond to key presses.'
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -216,6 +235,7 @@ class LunarLander:
             self.lander.land = True
             if self.scoreboard.total_fuel >= 100:
                 self.flag = True
+                self.scoreboard.oops_moon = True 
                 self.lander.speed = [0,0]
                 self.scoreboard.contador += 1
                 if self.scoreboard.contador == 1:
@@ -224,6 +244,7 @@ class LunarLander:
                 if self.scoreboard.contador == 50:
                     self.lander.rect = self.lander.image.get_rect()
                     self.flag = False 
+                    self.scoreboard.oops_moon = False
                     self.scoreboard.land = False 
                     self.lander.land = False 
                     self.scoreboard.contador = 0
@@ -236,9 +257,11 @@ class LunarLander:
                     self.scoreboard.is_gameover = True
                     self.lander.speed = [0,0]
                 if self.flag:
+                    self.scoreboard.oops_moon = True 
                     if self.scoreboard.contador == 50:
                         self.lander.rect = self.lander.image.get_rect()
                         self.flag = False 
+                        self.scoreboard.oops_moon = False
                         self.scoreboard.land = False
                         self.lander.land = False
                         self.scoreboard.contador = 0
@@ -285,4 +308,4 @@ class LunarLander:
 
 if __name__ == '__main__':
     ll = LunarLander()
-    ll.run_game()
+    ll.main_menu()
