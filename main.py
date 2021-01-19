@@ -34,7 +34,7 @@ class Lander(Sprite):
         self.move_right = False
         self.move_up = False
 
-        self.fuel = 500
+        self.fuel = 1000
         self.land = False 
 
     def move(self):
@@ -115,7 +115,7 @@ class ScoreBoard:
         self.lander = Lander(ll_game)
 
         self.total_score = 0
-        self.total_fuel = 500
+        self.total_fuel = 1000
         self.wastefuel = False 
         self.is_gameover = False 
         self.is_gameover_clutch = False 
@@ -150,7 +150,7 @@ class ScoreBoard:
             self.screen.blit(self.score, (self.settings.screen_width / 2 - self.score.get_width() / 2 , self.settings.screen_height / 2 - self.score.get_height() / 2 + 7))
 
     def draw_speed(self, ll_speed):
-        self.speed = self.settings.font.render('Vertical Speed  ' + str(int(ll_speed *65.7)),1, self.settings.white)
+        self.speed = self.settings.font.render('Vertical Speed  ' + str(int(ll_speed * 66.3)), 1, self.settings.white)
         self.screen.blit(self.speed,(1080 - self.speed.get_width(),0))
         if self.too_fast:
             self.too_fast_text = self.settings.font.render('Too Fast!',1, self.settings.white)
@@ -173,6 +173,7 @@ class LunarLander:
         self.moon = Moon(self)
         self.base = Base(self)
         self.scoreboard = ScoreBoard(self)
+        self.rungame = False 
 
     def main_menu(self):
         while True:
@@ -186,12 +187,31 @@ class LunarLander:
                     sys.exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
+                        self.scoreboard.total_score = 0
+                        self.scoreboard.total_fuel = 1000
+                        self.scoreboard.wastefuel = False 
+                        self.scoreboard.is_gameover = False 
+                        self.scoreboard.is_gameover_clutch = False 
+                        self.scoreboard.too_fast = False
+                        self.scoreboard.oops_moon = False
+                        self.scoreboard.land = False 
+                        self.scoreboard.contador = 0                          
+                        self.lander.speed = [0, 2]
+                        self.lander.move_left = False
+                        self.lander.move_right = False
+                        self.lander.move_up = False
+                        self.lander.fuel = 1000
+                        self.lander.land = False 
+                        self.lander.rect = self.lander.image.get_rect()               
+                        self.base.get_pos = True
+                        self.pos = random.randrange(3) 
+                        self.rungame = True 
                         self.run_game()
                     if event.key == pygame.K_ESCAPE:
                         sys.quit()
 
     def run_game(self):
-        while True:
+        while self.rungame:
             self._check_events()
             self.lander.update()
             self.lander.move()
@@ -256,6 +276,9 @@ class LunarLander:
                     self.lander.fuel = 0 
                     self.scoreboard.is_gameover = True
                     self.lander.speed = [0,0]
+                    self.scoreboard.contador += 1
+                    if self.scoreboard.contador == 50:
+                        self.rungame = False 
                 if self.flag:
                     self.scoreboard.oops_moon = True 
                     if self.scoreboard.contador == 50:
@@ -274,7 +297,7 @@ class LunarLander:
             if self.scoreboard.total_fuel > 0:
                 self.scoreboard.contador += 1 
                 if self.scoreboard.contador == 1:
-                    if self.lander.speed[1] < 125 / 65.7:
+                    if self.lander.speed[1] < 125 / 66.3:
                         self.scoreboard.total_score += 1
                     else: 
                         self.scoreboard.too_fast = True 
@@ -291,6 +314,9 @@ class LunarLander:
             else:
                 self.lander.speed = [0,0]
                 self.scoreboard.is_gameover_clutch =  True
+                self.scoreboard.cotador += 1
+                if self.scoreboard.contador == 50:
+                    self.rungame = False 
                   
     def _update_screen(self):
         'Update images on the screen, and flip to the new screen.'
