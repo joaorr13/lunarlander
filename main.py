@@ -314,7 +314,7 @@ class LunarLander:
             else:
                 self.lander.speed = [0,0]
                 self.scoreboard.is_gameover_clutch =  True
-                self.scoreboard.cotador += 1
+                self.scoreboard.contador += 1
                 if self.scoreboard.contador == 50:
                     self.rungame = False 
                   
